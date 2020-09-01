@@ -1,213 +1,226 @@
 <template>
- <div class="big">
-     <div class="mid">
-         <el-row :gutter="32">
-             <el-col :xs="24" :sm="24" :lg="8">
-                 <div class="chart-wrapper">
-                     <raddar-chart />
-                 </div>
-             </el-col>
-             <el-col :xs="24" :sm="24" :lg="8">
-                 <div class="chart-wrapper">
-                     <stackMap />
-                 </div>
-             </el-col>
-             <el-col :xs="24" :sm="24" :lg="8">
-                 <div class="chart-wrapper">
-                     <Sunburst/>
-                 </div>
-             </el-col>
-         </el-row>
-     </div>
-     <div class="top">
-         <div id="main" class="chart-container"></div>
-     </div>
-      <div class="bottom">
-         <el-row :gutter="32">
-             <el-col :xs="24" :sm="24" :lg="12">
-                 <div class="chart-player">
-                     <musicPlayer />
-                 </div>
-             </el-col>
-             <el-col :xs="24" :sm="24" :lg="12">
-                 <div  class="chart-player">
-                     <todo-list />
-                 </div>
-             </el-col>
-         </el-row>
-     </div>
- </div>
+  <div>
+    <div class="search-term">
+      <el-form :inline="true" :model="searchInfo" class="demo-form-inline">
+        <el-form-item label="起点">
+          <el-input placeholder="搜索条件" v-model="searchInfo.start"></el-input>
+        </el-form-item>
+        <el-form-item label="终点">
+          <el-input placeholder="搜索条件" v-model="searchInfo.end"></el-input>
+        </el-form-item>
+        <el-form-item>
+          <el-button @click="onSubmit" type="primary">查询</el-button>
+        </el-form-item>
+        <el-form-item>
+          <el-button @click="openDialog" type="primary">新增货运订单</el-button>
+        </el-form-item>
+        <el-form-item>
+          <el-popover placement="top" v-model="deleteVisible" width="160">
+            <p>确定要删除吗？</p>
+              <div style="text-align: right; margin: 0">
+                <el-button @click="deleteVisible = false" size="mini" type="text">取消</el-button>
+                <el-button @click="onDelete" size="mini" type="primary">确定</el-button>
+              </div>
+            <el-button icon="el-icon-delete" size="mini" slot="reference" type="danger">批量删除</el-button>
+          </el-popover>
+        </el-form-item>
+      </el-form>
+    </div>
+    <el-table
+      :data="tableData"
+      @selection-change="handleSelectionChange"
+      border
+      ref="multipleTable"
+      stripe
+      style="width: 100%"
+      tooltip-effect="dark"
+    >
+    <el-table-column type="selection" width="55"></el-table-column>
+    <el-table-column label="日期" width="180">
+         <template slot-scope="scope">{{scope.row.CreatedAt|formatDate}}</template>
+    </el-table-column>
 
+    <el-table-column label="起点" prop="start" width="120"></el-table-column>
+
+    <el-table-column label="终点" prop="end" width="120"></el-table-column>
+
+      <el-table-column label="按钮组">
+        <template slot-scope="scope">
+          <el-button @click="updateCargoOrder(scope.row)" size="small" type="primary">变更</el-button>
+          <el-popover placement="top" width="160" v-model="scope.row.visible">
+            <p>确定要删除吗？</p>
+            <div style="text-align: right; margin: 0">
+              <el-button size="mini" type="text" @click="scope.row.visible = false">取消</el-button>
+              <el-button type="primary" size="mini" @click="deleteCargoOrder(scope.row)">确定</el-button>
+            </div>
+            <el-button type="danger" icon="el-icon-delete" size="mini" slot="reference">删除</el-button>
+          </el-popover>
+        </template>
+      </el-table-column>
+    </el-table>
+
+    <el-pagination
+      :current-page="page"
+      :page-size="pageSize"
+      :page-sizes="[10, 30, 50, 100]"
+      :style="{float:'right',padding:'20px'}"
+      :total="total"
+      @current-change="handleCurrentChange"
+      @size-change="handleSizeChange"
+      layout="total, sizes, prev, pager, next, jumper"
+    ></el-pagination>
+
+    <el-dialog :before-close="closeDialog" :visible.sync="dialogFormVisible" title="弹窗操作">
+      <el-form ref="elForm" :model="formData" :rules="rules" size="medium" label-width="100px">
+        <el-col :span="23">
+          <el-form-item label="出发地" prop="start">
+            <el-input v-model="formData.start" placeholder="请输入出发地" clearable :style="{width: '100%'}">
+            </el-input>
+          </el-form-item>
+        </el-col>
+        <el-col :span="24">
+          <el-form-item label="目的地" prop="end">
+            <el-input v-model="formData.end" placeholder="请输入目的地" clearable :style="{width: '100%'}">
+            </el-input>
+          </el-form-item>
+        </el-col>
+      </el-form>
+      <div class="dialog-footer" slot="footer">
+        <el-button @click="closeDialog">取 消</el-button>
+        <el-button @click="enterDialog" type="primary">确 定</el-button>
+      </div>
+    </el-dialog>
+  </div>
 </template>
 
 <script>
-import echarts from 'echarts'
-require('echarts/theme/macarons') // echarts theme
-import RaddarChart from "./component/RaddarChart"
-import stackMap from "./component/stackMap"
-import Sunburst from "./component/Sunburst"
-import musicPlayer from "./component/musicPlayer"
-import TodoList from "./component/todoList"
+import {
+    createCargoOrder,
+    deleteCargoOrder,
+    deleteCargoOrderByIds,
+    updateCargoOrder,
+    findCargoOrder,
+    getCargoOrderList
+} from "@/api/cargo_order";  //  此处请自行替换地址
+import { formatTimeToStr } from "@/utils/data";
+import infoList from "@/components/mixins/infoList";
 
 export default {
-  name: 'Dashboard',
+  name: "CargoOrder",
+  mixins: [infoList],
   data() {
     return {
-
+      listApi: getCargoOrderList,
+      dialogFormVisible: false,
+      visible: false,
+      type: "",
+      deleteVisible: false,
+      multipleSelection: [],formData: {
+        start:null,end:null,
+      }
+    };
+  },
+  filters: {
+    formatDate: function(time) {
+      if (time != null && time != "") {
+        var date = new Date(time);
+        return formatTimeToStr(date, "yyyy-MM-dd hh:mm:ss");
+      } else {
+        return "";
+      }
+    },
+    formatBoolean: function(bool) {
+      if (bool != null) {
+        return bool ? "是" :"否";
+      } else {
+        return "";
+      }
     }
   },
-    components:{
-        RaddarChart, //雷达图
-        stackMap, //堆叠图
-        Sunburst, //旭日图
-        musicPlayer,  //音乐播放器
-        TodoList //TodoList
+  methods: {
+      //条件搜索前端看此方法
+      onSubmit() {
+        this.page = 1
+        this.pageSize = 10
+        this.getTableData()
+      },
+      handleSelectionChange(val) {
+        this.multipleSelection = val
+      },
+      async onDelete() {
+        const ids = []
+        this.multipleSelection &&
+          this.multipleSelection.map(item => {
+            ids.push(item.ID)
+          })
+        const res = await deleteCargoOrderByIds({ ids })
+        if (res.code == 0) {
+          this.$message({
+            type: 'success',
+            message: '删除成功'
+          })
+          this.deleteVisible = false
+          this.getTableData()
+        }
+      },
+    async updateCargoOrder(row) {
+      const res = await findCargoOrder({ ID: row.ID });
+      this.type = "update";
+      if (res.code == 0) {
+        this.formData = res.data.reorder;
+        this.dialogFormVisible = true;
+      }
     },
-  mounted() {
-      let myChart = echarts.init(document.getElementById('main'),'macarons');
-      // let stackMap = echarts.init(document.getElementById('stackMap'));
-      let  option = {
-          legend: {},
-          tooltip: {
-              trigger: 'axis',
-              showContent: false
-          },
-          dataset: {
-              source: [
-                  ['product', '2012', '2013', '2014', '2015', '2016', '2017','2018','2019','2020'],
-                  ['Matcha Latte', 41.1, 30.4, 65.1, 53.3, 83.8, 70.0,6.4, 65.2, 82.5],
-                  ['Milk Tea', 86.5, 92.1, 85.7, 83.1, 73.4, 55.1,2, 67.1, 69.2],
-                  ['Cheese Cocoa', 24.1, 67.2, 79.5, 86.4, 65.2, 82.5,65.1, 53.3, 83.8],
-                  ['Walnut Brownie', 55.2, 67.1, 69.2, 72.4, 53.9, 39.1,86.5, 92.1, 85.7]
-              ]
-          },
-          xAxis: {
-              type: 'category',
-              axisLabel: {
-                  show: true,
-                  textStyle: {
-                      color: 'rgb(192,192,192)',  //更改坐标轴文字颜色
-                      fontSize : 14    //更改坐标轴文字大小
-                  }
-              },
-              axisTick: {
-                  show: false
-              },
-              axisLine:{
-                  lineStyle:{
-                      color:'rgb(192,192,192)' //更改坐标轴颜色
-                  }
-              },
-          },
-          yAxis: {
-              gridIndex:0,
-              axisLabel: {
-                  show: true,
-                  textStyle: {
-                      color: 'rgb(192,192,192)',  //更改坐标轴文字颜色
-                      fontSize: 14    //更改坐标轴文字大小
-                  }
-              },
-              axisTick: {
-                  show: false
-              },
-              axisLine: {
-                  lineStyle: {
-                      color: 'rgb(192,192,192)' //更改坐标轴颜色
-                  }
-              }
-          },
-          grid: {top: '55%'},
-          series: [
-              {type: 'line', smooth: true, seriesLayoutBy: 'row'},
-              {type: 'line', smooth: true, seriesLayoutBy: 'row'},
-              {type: 'line', smooth: true, seriesLayoutBy: 'row'},
-              {type: 'line', smooth: true, seriesLayoutBy: 'row'},
-              {
-                  type: 'pie',
-                  id: 'pie',
-                  radius: '30%',
-                  center: ['50%', '25%'],
-                  label: {
-                      formatter: '{b}: {@2012} ({d}%)'
-                  },
-                  encode: {
-                      itemName: 'product',
-                      value: '2012',
-                      tooltip: '2012'
-                  }
-              }
-          ]
+    closeDialog() {
+      this.dialogFormVisible = false;
+      this.formData = {
+
+          start:null,
+          end:null,
       };
-      //点记标记点时的动效
-      myChart.on('updateAxisPointer', function (event) {
-          var xAxisInfo = event.axesInfo[0];
-          if (xAxisInfo) {
-              var dimension = xAxisInfo.value + 1;
-              myChart.setOption({
-                  series: {
-                      id: 'pie',
-                      label: {
-                          formatter: '{b}: {@[' + dimension + ']} ({d}%)'
-                      },
-                      encode: {
-                          value: dimension,
-                          tooltip: dimension
-                      }
-                  }
-              });
-          }
-      });
-
-      window.addEventListener('resize',function() {myChart.resize()});
-      myChart.setOption(option);
-
-  }
-}
+    },
+    async deleteCargoOrder(row) {
+      this.visible = false;
+      const res = await deleteCargoOrder({ ID: row.ID });
+      if (res.code == 0) {
+        this.$message({
+          type: "success",
+          message: "删除成功"
+        });
+        this.getTableData();
+      }
+    },
+    async enterDialog() {
+      let res;
+      switch (this.type) {
+        case "create":
+          res = await createCargoOrder(this.formData);
+          break;
+        case "update":
+          res = await updateCargoOrder(this.formData);
+          break;
+        default:
+          res = await createCargoOrder(this.formData);
+          break;
+      }
+      if (res.code == 0) {
+        this.$message({
+          type:"success",
+          message:"创建/更改成功"
+        })
+        this.closeDialog();
+        this.getTableData();
+      }
+    },
+    openDialog() {
+      this.type = "create";
+      this.dialogFormVisible = true;
+    }
+  },
+  async created() {
+    await this.getTableData();}
+};
 </script>
 
-<style lang="scss" scoped>
-    .big{
-        margin:100px 0 0 0;
-        padding-top: 0;
-        background-color: rgb(243,243,243);;
-        .top{
-            width: 100%;
-            height: 360px;
-            margin-top: 20px;
-            overflow: hidden;
-            .chart-container{
-                position: relative;
-                width: 100%;
-                height: 100%;
-                padding: 20px;
-                background-color: #fff;
-            }
-        }
-        .mid{
-            width: 100%;
-            height: 380px;
-            .chart-wrapper {
-                height: 340px;
-                background: #fff;
-                padding: 16px 16px 0;
-                margin-bottom: 32px;
-            }
-        }
-        .bottom{
-            width: 100%;
-            height: 300px;
-            margin: 20px 0;
-            .el-row{
-                margin-right: 4px !important;
-            }
-            .chart-player{
-                width: 100%;
-                height: 270px;
-                padding: 10px;
-                background-color: #fff;
-            }
-        }
-    }
-
+<style>
 </style>

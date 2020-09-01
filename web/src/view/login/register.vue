@@ -3,12 +3,12 @@
     <div class="container">
       <div class="top">
         <div class="desc">
-          <img class="logo_login" src="@/assets/logo_login.png" alt="" />
+          <img class="logo_login" src="@/assets/huoche.png" alt="" />
         </div>
         <div class="header">
           <a href="/">
             <!-- <img src="~@/assets/logo.png" class="logo" alt="logo" /> -->
-            <span class="title">Gin-Vue-Admin</span>
+            <span class="title">大牛货运</span>
           </a>
         </div>
       </div>
@@ -27,6 +27,16 @@
             <i
                 class="el-input__icon el-icon-user"
                 slot="suffix"
+              ></i></el-input>
+          </el-form-item>
+          <el-form-item prop="nickname">
+            <el-input
+                    placeholder="请输入昵称"
+                    v-model="registerForm.nickname"
+            >
+              <i
+                      class="el-input__icon el-icon-user"
+                      slot="suffix"
               ></i></el-input>
           </el-form-item>
           <el-form-item prop="password">
@@ -51,7 +61,7 @@
             <i :class="'el-input__icon el-icon-' + lock" @click="changeLock" slot="suffix"></i>
           </el-input>
         </el-form-item>
-        
+
           <el-form-item>
             <el-button type="primary" @click="submitForm" style="width:100%"
               >注 册</el-button
@@ -61,20 +71,6 @@
       </div>
 
       <div class="footer">
-        <div class="links">
-          <a href="http://doc.henrongyi.top/"
-            ><img src="@/assets/docs.png" class="link-icon"
-          /></a>
-          <a href="https://www.yuque.com/flipped-aurora/"
-            ><img src="@/assets/yuque.png" class="link-icon"
-          /></a>
-          <a href="https://github.com/flipped-aurora/gin-vue-admin"
-            ><img src="@/assets/github.png" class="link-icon"
-          /></a>
-          <a href="https://space.bilibili.com/322210472"
-            ><img src="@/assets/video.png" class="link-icon"
-          /></a>
-        </div>
         <div class="copyright">
           Copyright &copy; 2020 💖flipped-aurora
         </div>
@@ -103,6 +99,13 @@ export default {
         callback()
       }
     }
+    const checkNickname = (rule, value, callback) => {
+      if (value.length < 5 || value.length > 12) {
+        return callback(new Error('请输入正确的昵称'))
+      } else {
+        callback()
+      }
+    }
     const checkPassword = (rule, value, callback) => {
       if (value.length < 6 || value.length > 12) {
         return callback(new Error('请输入正确的密码'))
@@ -116,12 +119,15 @@ export default {
       registerForm: {
         username: '',
         password: '',
-        rePassword: ''
+        rePassword: '',
+        nickname: '',
+        authorityId: '101'
       },
       rules: {
         username: [{ validator: checkUsername, trigger: 'blur' }],
         password: [{ validator: checkPassword, trigger: 'blur' }],
-        rePassword: [{ validator: ratioPassword, trigger: 'blur' }]
+        rePassword: [{ validator: ratioPassword, trigger: 'blur' }],
+        nickname: [{ validator: checkNickname, trigger: 'blur' }]
       }
     }
   },

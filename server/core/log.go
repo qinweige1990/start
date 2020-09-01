@@ -17,7 +17,7 @@ import (
 const (
 	logDir      = "log"
 	logSoftLink = "latest_log"
-	module      = "gin-vue-admin"
+	module      = "大牛货运"
 )
 
 var (

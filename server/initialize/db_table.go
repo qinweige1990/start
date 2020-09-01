@@ -24,6 +24,7 @@ func DBTables() {
 		model.ExaSimpleUploader{},
 		model.ExaCustomer{},
 		model.SysOperationRecord{},
+		model.CargoOrder{},
 	)
 	global.GVA_LOG.Debug("register table success")
 }
