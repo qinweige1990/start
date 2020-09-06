@@ -853,7 +853,7 @@ li {
 .el-container {
     .admin-box {
         padding: 24px 24px 40px 24px;
-        margin: 115px 24px 24px 24px;
+        margin: 50px 10px 10px 10px;
         border-radius: 2px;
         .button-box {
             border: none;
@@ -945,19 +945,6 @@ li {
 
 .el-container.layout-cont {
     .main-cont {
-        .router-history {
-            padding-bottom: 8px;
-            padding-top: 5px;
-            border-color: #f9f9f9;
-            box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
-            .el-tabs__header {
-                margin: 0px 0 0 0;
-                .el-tabs__item {
-                    line-height: 35px;
-                    height: 35px;
-                }
-            }
-        }
     }
 }
 

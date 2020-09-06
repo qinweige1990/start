@@ -53,7 +53,6 @@
             <!-- 当前面包屑用路由自动生成可根据需求修改 -->
             <!--
             :to="{ path: item.path }" 暂时注释不用-->
-            <HistoryComponent />
           </div>
         </transition>
         <transition mode="out-in" name="el-fade-in-linear">
@@ -89,7 +88,6 @@
 
 <script>
 import Aside from '@/view/layout/aside'
-import HistoryComponent from '@/view/layout/aside/historyComponent/history'
 import Screenfull from '@/view/layout/screenfull'
 import Search from '@/view/layout/search/search'
 import BottomInfo from '@/view/layout/bottomInfo/bottomInfo'
@@ -136,7 +134,6 @@ export default {
   },
   components: {
     Aside,
-    HistoryComponent,
     Screenfull,
     Search,
     BottomInfo,
