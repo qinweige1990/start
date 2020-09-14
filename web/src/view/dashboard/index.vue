@@ -40,8 +40,10 @@
         </el-form-item>
       </el-form>
     </div>
+
     <el-table
       :data="tableData"
+      id="orderTable"
       height="700"
       @selection-change="handleSelectionChange"
       border
@@ -68,40 +70,22 @@
 
       <el-table-column label="运费尾款" prop="dueFare" width="80" align="center" :show-overflow-tooltip="true"></el-table-column>
 
-      <el-table-column label="运单状态" prop="transportStatus" width="80" align="center" :show-overflow-tooltip="true">
-        <template slot-scope="scope">
-          {{filterDict(scope.row.transportStatus,"int")}}
-        </template>
+      <el-table-column label="运单状态" prop="transportStatus" width="80" align="center" :show-overflow-tooltip="true" :formatter="transportStatusFormat">
       </el-table-column>
 
-      <el-table-column label="运费审核状态" prop="fareAuditStatus" width="110" align="center" :show-overflow-tooltip="true">
-        <template slot-scope="scope">
-          {{filterDict(scope.row.fareAuditStatus,"int")}}
-        </template>
+      <el-table-column label="运费审核状态" prop="fareAuditStatus" width="110" align="center" :show-overflow-tooltip="true" :formatter="fareAuditFormat">
       </el-table-column>
 
-      <el-table-column label="运单审核状态" prop="orderAuditStatus" width="110" align="center" :show-overflow-tooltip="true">
-        <template slot-scope="scope">
-          {{filterDict(scope.row.orderAuditStatus,"int")}}
-        </template>
+      <el-table-column label="运单审核状态" prop="orderAuditStatus" width="110" align="center" :show-overflow-tooltip="true" :formatter="orderAuditFormat">
       </el-table-column>
 
-      <el-table-column label="运费支付状态" prop="farePayStatus" width="110" align="center" :show-overflow-tooltip="true">
-        <template slot-scope="scope">
-          {{filterDict(scope.row.farePayStatus,"int")}}
-        </template>
+      <el-table-column label="运费支付状态" prop="farePayStatus" width="110" align="center" :show-overflow-tooltip="true" :formatter="farePayFormat">
       </el-table-column>
 
-      <el-table-column label="尾款支付状态" prop="dueFareStatus" width="110" align="center" :show-overflow-tooltip="true">
-        <template slot-scope="scope">
-          {{filterDict(scope.row.dueFareStatus,"int")}}
-        </template>
+      <el-table-column label="尾款支付状态" prop="dueFareStatus" width="110" align="center" :show-overflow-tooltip="true" :formatter="dueFareFormat">
       </el-table-column>
 
-      <el-table-column label="开票状态" prop="invoiceStatus" width="80" align="center" :show-overflow-tooltip="true">
-        <template slot-scope="scope">
-          {{filterDict(scope.row.invoiceStatus,"int")}}
-        </template>
+      <el-table-column label="开票状态" prop="invoiceStatus" width="80" align="center" :show-overflow-tooltip="true" :formatter="invoiceStatusFormat">
       </el-table-column>
 
     <el-table-column label="货物" prop="good" width="80" align="center" :show-overflow-tooltip="true"></el-table-column>
@@ -154,7 +138,10 @@
       </template>
     </el-table-column>
     </el-table>
-
+    <!-- 导出按钮 -->
+    <div class="toexcel">
+      <el-button  @click="exportExcel" type="primary">导出</el-button>
+    </div>
     <el-pagination
       :current-page="page"
       :page-size="pageSize"
@@ -268,6 +255,8 @@ import {
 } from "@/api/order";  //  此处请自行替换地址
 import { formatTimeToStr } from "@/utils/data";
 import infoList from "@/components/mixins/infoList";
+import FileSaver from "file-saver";
+import XLSX from "xlsx";
 
 export default {
   name: "Order",
@@ -400,6 +389,7 @@ export default {
         "value": "3"
       }],
     };
+
   },
   filters: {
     formatDate: function(time) {
@@ -419,6 +409,75 @@ export default {
     }
   },
   methods: {
+    // 导出表格所用
+    exportExcel() {
+      // 从表格生成workbook
+      let fix = document.querySelector('.el-table__fixed');
+        let wb = XLSX.utils.table_to_book(document.querySelector('#orderTable').removeChild(fix));
+        document.querySelector('#orderTable').appendChild(fix);
+
+      let wbout = XLSX.write(wb, {
+        bookType: "xlsx",
+        bookSST: true,
+        type: "array"
+      });
+      try {
+        // 下载
+        let b = new Blob([wbout], { type: "application/octet-stream" });
+        FileSaver.saveAs(b, "运单报表.xlsx");
+      } catch (e) {
+        if (typeof console !== "undefined") {
+          console.log(e, wbout);
+        }
+      }
+      return wbout;
+    },
+
+      orderAuditFormat(row) {
+        switch (row.orderAuditStatus) {
+          case 0: return "待审核"
+          case 1: return "审核通过"
+          case 2: return "审核不通过"
+        }
+      },
+    fareAuditFormat(row) {
+      switch (row.orderAuditStatus) {
+        case 0: return "待审核"
+        case 1: return "审核通过"
+        case 2: return "已驳回"
+      }
+    },
+    invoiceStatusFormat(row) {
+      switch (row.orderAuditStatus) {
+        case 0: return "未开票"
+        case 1: return "开票中"
+        case 2: return "已开票"
+        case 3: return "审核中"
+        case 4: return "已驳回"
+      }
+    },
+    dueFareFormat(row) {
+      switch (row.orderAuditStatus) {
+        case 0: return "未支付"
+        case 1: return "已支付"
+      }
+    },
+    farePayFormat(row) {
+      switch (row.orderAuditStatus) {
+        case 0: return "未支付"
+        case 1: return "部分支付"
+        case 2: return "全部支付"
+      }
+    },
+    transportStatusFormat(row) {
+      switch (row.orderAuditStatus) {
+        case 0: return "待装货"
+        case 1: return "待送达"
+        case 2: return "待签收"
+        case 3: return "已签收"
+        case 4: return "已删除"
+      }
+    },
       //条件搜索前端看此方法
       onSubmit() {
         this.page = 1
@@ -539,6 +598,7 @@ export default {
       })
     },
   },
+
   async created() {
     await this.getTableData();await this.getDict("int");await this.getDict("int");await this.getDict("int");await this.getDict("int");await this.getDict("int");await this.getDict("int")}
 };
