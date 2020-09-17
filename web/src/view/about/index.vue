@@ -3,22 +3,22 @@
     <el-row :gutter="10">
       <el-col :span="12">
         <el-card>
-          <div slot="header">大牛货运</div>
+          <div slot="header">牛牛后台</div>
           <div>
             <el-row>
               <el-col :span="8" :offset="8">
-                <a href="https://github.com/flipped-aurora/大牛货运">
+                <a href="https://github.com/flipped-aurora/休闲牛牛">
                   <img
                     class="org-img dom-center"
                     src="@/assets/huoche.png"
-                    alt="大牛货运"
+                    alt="休闲牛牛"
                   />
                 </a>
               </el-col>
             </el-row>
             <el-row :gutter="10">
               <el-col :span="8">
-                <a href="https://github.com/flipped-aurora/大牛货运">
+                <a href="https://github.com/flipped-aurora/休闲牛牛">
                   <img
                     class="dom-center"
                     src="https://img.shields.io/github/watchers/flipped-aurora/gin-vue-admin.svg?label=Watch"
@@ -27,14 +27,14 @@
                 </a>
               </el-col>
               <el-col :span="8">
-                <a href="https://github.com/flipped-aurora/大牛货运">
+                <a href="https://github.com/flipped-aurora/休闲牛牛">
                   <img
                     class="dom-center"
                     src="https://img.shields.io/github/stars/flipped-aurora/gin-vue-admin.svg?style=social"
                     alt=""/></a
               ></el-col>
               <el-col :span="8">
-                <a href="https://github.com/flipped-aurora/大牛货运">
+                <a href="https://github.com/flipped-aurora/休闲牛牛">
                   <img
                     class="dom-center"
                     src="https://img.shields.io/github/forks/flipped-aurora/gin-vue-admin.svg?label=Fork"

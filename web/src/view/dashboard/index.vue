@@ -2,19 +2,6 @@
   <div>
     <div class="search-term">
       <el-form :inline="true" :model="searchInfo" class="demo-form-inline" label-width="100">
-
-        <el-form-item label="运单审核状态">
-          <el-select v-model="searchInfo.orderAuditStatus" placeholder="全选" clearable style="width: 120px">
-            <el-option v-for="(item, index) in orderAuditOptions" :key="index" :label="item.label"
-                       :value="item.value" :disabled="item.disabled"></el-option>
-          </el-select>
-        </el-form-item>
-        <el-form-item label="开票状态">
-          <el-select v-model="searchInfo.invoiceStatus" placeholder="全选" clearable style="width: 120px">
-            <el-option v-for="(item, index) in invoiceStatusOptions" :key="index" :label="item.label"
-                       :value="item.value" :disabled="item.disabled"></el-option>
-          </el-select>
-        </el-form-item>
         <el-form-item label="目的地">
           <el-input placeholder="搜索条件" v-model="searchInfo.end"></el-input>
         </el-form-item>
@@ -53,88 +40,21 @@
     >
     <el-table-column type="selection" width="40"></el-table-column>
     <el-table-column label="序号" type="index" fixed prop="scope.$index" align="center" width = "50"></el-table-column>
-
     <el-table-column label="运输单号" prop="transportId" center width="100"></el-table-column>
-
     <el-table-column label="派车时间" prop="departureTime" align="center" width="120" :show-overflow-tooltip="true"></el-table-column>
-
     <el-table-column label="起始地" prop="start" width="120" align="center" :show-overflow-tooltip="true"></el-table-column>
-
     <el-table-column label="目的地" prop="end" width="120" align="center" :show-overflow-tooltip="true"></el-table-column>
-
-      <el-table-column label="总运费" prop="totalFare" width="80" align="center" :show-overflow-tooltip="true"></el-table-column>
-
-      <el-table-column label="预付运费" prop="preFare" width="80" align="center" :show-overflow-tooltip="true"></el-table-column>
-
-      <el-table-column label="已支付" prop="paidFare" width="80" align="center" :show-overflow-tooltip="true"></el-table-column>
-
-      <el-table-column label="运费尾款" prop="dueFare" width="80" align="center" :show-overflow-tooltip="true"></el-table-column>
-
-      <el-table-column label="运单状态" prop="transportStatus" width="80" align="center" :show-overflow-tooltip="true" :formatter="transportStatusFormat">
-      </el-table-column>
-
-      <el-table-column label="运费审核状态" prop="fareAuditStatus" width="110" align="center" :show-overflow-tooltip="true" :formatter="fareAuditFormat">
-      </el-table-column>
-
-      <el-table-column label="运单审核状态" prop="orderAuditStatus" width="110" align="center" :show-overflow-tooltip="true" :formatter="orderAuditFormat">
-      </el-table-column>
-
-      <el-table-column label="运费支付状态" prop="farePayStatus" width="110" align="center" :show-overflow-tooltip="true" :formatter="farePayFormat">
-      </el-table-column>
-
-      <el-table-column label="尾款支付状态" prop="dueFareStatus" width="110" align="center" :show-overflow-tooltip="true" :formatter="dueFareFormat">
-      </el-table-column>
-
-      <el-table-column label="开票状态" prop="invoiceStatus" width="80" align="center" :show-overflow-tooltip="true" :formatter="invoiceStatusFormat">
-      </el-table-column>
-
     <el-table-column label="货物" prop="good" width="80" align="center" :show-overflow-tooltip="true"></el-table-column>
-
-    <el-table-column label="司机" prop="driver" width="80" align="center" :show-overflow-tooltip="true"></el-table-column>
-
-    <el-table-column label="司机电话" prop="driverPhone" width="100" align="center" :show-overflow-tooltip="true"></el-table-column>
-
-    <el-table-column label="车牌号" prop="carNumber" width="100" align="center" :show-overflow-tooltip="true"></el-table-column>
-
-    <el-table-column label="装车数据" prop="startWeight" width="80" align="center" :show-overflow-tooltip="true"></el-table-column>
-
-    <el-table-column label="卸车数据" prop="endWeight" width="80" align="center" :show-overflow-tooltip="true"></el-table-column>
-
-
-
     <el-table-column label="发货客户" prop="startCustomer" width="120" align="center" :show-overflow-tooltip="true"></el-table-column>
-
     <el-table-column label="发货电话" prop="startPhone" width="120" align="center" :show-overflow-tooltip="true"></el-table-column>
-
     <el-table-column label="收货客户" prop="endCustomer" width="120" align="center" :show-overflow-tooltip="true"></el-table-column>
-
     <el-table-column label="收货电话" prop="endPhone" width="120" align="center" :show-overflow-tooltip="true"></el-table-column>
-
-    <el-table-column label="服务站名称" prop="station" width="100" align="center" :show-overflow-tooltip="true"></el-table-column>
-
-    <el-table-column label="服务站电话" prop="stationPhone" width="100" align="center" :show-overflow-tooltip="true"></el-table-column>
-
-    <el-table-column label="计划单号" prop="planId" width="100" align="center" :show-overflow-tooltip="true"></el-table-column>
-
-    <el-table-column label="订单编号" prop="orderId" width="100" align="center" :show-overflow-tooltip="true"></el-table-column>
-
     <el-table-column label="承运方" prop="agent" width="100" align="center" :show-overflow-tooltip="true"></el-table-column>
-
-
-
     <el-table-column label="创造人" prop="createBy" width="80" align="center" :show-overflow-tooltip="true"></el-table-column>
 
     <el-table-column label="操作" width="120" align="center">
       <template slot-scope="scope">
         <el-button @click="updateOrder(scope.row)" size="small" type="primary">变更</el-button>
-        <el-popover placement="top" width="200" v-model="scope.row.visible">
-          <p>确定要删除吗？</p>
-          <div style="text-align: right; margin: 0">
-            <el-button size="mini" type="text" @click="scope.row.visible = false">取消</el-button>
-            <el-button type="primary" size="mini" @click="deleteOrder(scope.row)">确定</el-button>
-          </div>
-          <el-button type="danger" size="mini" slot="reference">删除</el-button>
-        </el-popover>
       </template>
     </el-table-column>
     </el-table>
@@ -159,12 +79,6 @@
           <el-form-item label="派车时间" prop="departureTime">
             <el-date-picker v-model="createOrder.departureTime" type="datetime"
                             :style="{width: '100%'}" placeholder="选择派车时间" clearable></el-date-picker>
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
-          <el-form-item label="订单单号" prop="orderId">
-            <el-input v-model="createOrder.orderId" placeholder="订单单号" clearable :style="{width: '100%'}">
-            </el-input>
           </el-form-item>
         </el-col>
         <el-col :span="8">
@@ -246,13 +160,13 @@
 
 <script>
 import {
-    createOrder,
-    deleteOrder,
-    deleteOrderByIds,
-    updateOrder,
-    findOrder,
-    getOrderList
-} from "@/api/order";  //  此处请自行替换地址
+    createPreOrder,
+    deletePreOrder,
+    deletePreOrderByIds,
+    updatePreOrder,
+    findPreOrder,
+    getPreOrderList
+} from "@/api/preOrder";  //  此处请自行替换地址
 import { formatTimeToStr } from "@/utils/data";
 import infoList from "@/components/mixins/infoList";
 import FileSaver from "file-saver";
@@ -263,7 +177,7 @@ export default {
   mixins: [infoList],
   data() {
     return {
-      listApi: getOrderList,
+      listApi: getPreOrderList,
       dialogFormVisible: false,
       visible: false,
       type: "",
@@ -359,35 +273,6 @@ export default {
         "label": "自运",
         "value": "自运"
       }],
-      orderAuditOptions :[{
-        "label": "全选",
-        "value": ""
-      },{
-        "label": "待审核",
-        "value": "0"
-      }, {
-        "label": "审核通过",
-        "value": "1"
-      },{
-        "label": "审核不通过",
-        "value": "2"
-      }],
-      invoiceStatusOptions :[{
-        "label": "全选",
-        "value": ""
-      },{
-        "label": "未开票",
-        "value": "0"
-      }, {
-        "label": "已开票",
-        "value": "1"
-      },{
-        "label": "审核中",
-        "value": "2"
-      },{
-        "label": "已驳回",
-        "value": "3"
-      }],
     };
 
   },
@@ -427,56 +312,9 @@ export default {
         FileSaver.saveAs(b, "运单报表.xlsx");
       } catch (e) {
         if (typeof console !== "undefined") {
-          console.log(e, wbout);
         }
       }
       return wbout;
-    },
-
-      orderAuditFormat(row) {
-        switch (row.orderAuditStatus) {
-          case 0: return "待审核"
-          case 1: return "审核通过"
-          case 2: return "审核不通过"
-        }
-      },
-    fareAuditFormat(row) {
-      switch (row.orderAuditStatus) {
-        case 0: return "待审核"
-        case 1: return "审核通过"
-        case 2: return "已驳回"
-      }
-    },
-    invoiceStatusFormat(row) {
-      switch (row.orderAuditStatus) {
-        case 0: return "未开票"
-        case 1: return "开票中"
-        case 2: return "已开票"
-        case 3: return "审核中"
-        case 4: return "已驳回"
-      }
-    },
-    dueFareFormat(row) {
-      switch (row.orderAuditStatus) {
-        case 0: return "未支付"
-        case 1: return "已支付"
-      }
-    },
-    farePayFormat(row) {
-      switch (row.orderAuditStatus) {
-        case 0: return "未支付"
-        case 1: return "部分支付"
-        case 2: return "全部支付"
-      }
-    },
-    transportStatusFormat(row) {
-      switch (row.orderAuditStatus) {
-        case 0: return "待装货"
-        case 1: return "待送达"
-        case 2: return "待签收"
-        case 3: return "已签收"
-        case 4: return "已删除"
-      }
     },
       //条件搜索前端看此方法
       onSubmit() {
@@ -493,7 +331,7 @@ export default {
           this.multipleSelection.map(item => {
             ids.push(item.ID)
           })
-        const res = await deleteOrderByIds({ ids })
+        const res = await deletePreOrderByIds({ ids })
         if (res.code == 0) {
           this.$message({
             type: 'success',
@@ -504,16 +342,16 @@ export default {
         }
       },
     async updateOrder(row) {
-      const res = await findOrder({ ID: row.ID });
+      const res = await findPreOrder({ ID: row.ID });
       this.type = "update";
       if (res.code == 0) {
-        this.formData = res.data.reorder;
+        this.createOrder = res.data.rePreOrder;
         this.dialogFormVisible = true;
       }
     },
     closeDialog() {
       this.dialogFormVisible = false;
-      this.formData = {
+      this.createOrder = {
 
           transportId:null,
           departureTime:null,
@@ -549,7 +387,7 @@ export default {
     },
     async deleteOrder(row) {
       this.visible = false;
-      const res = await deleteOrder({ ID: row.ID });
+      const res = await deletePreOrder({ ID: row.ID });
       if (res.code == 0) {
         this.$message({
           type: "success",
@@ -562,13 +400,13 @@ export default {
       let res;
       switch (this.type) {
         case "create":
-          res = await createOrder(this.createOrder);
+          res = await createPreOrder(this.createOrder);
           break;
         case "update":
-          res = await updateOrder(this.formData);
+          res = await updatePreOrder(this.createOrder);
           break;
         default:
-          res = await createOrder(this.formData);
+          res = await createPreOrder(this.createOrder);
           break;
       }
       if (res.code == 0) {

@@ -8,7 +8,7 @@
         <div class="header">
           <a href="/">
             <!-- <img src="~@/assets/huoche.png" class="logo" alt="logo" /> -->
-            <span class="title">大牛货运</span>
+            <span class="title">牛牛后台</span>
           </a>
         </div>
       </div>
@@ -72,7 +72,7 @@
         <div class="links">
         </div>
         <div class="copyright">
-          Copyright &copy; {{ curYear }} 大牛货运
+          Copyright &copy; {{ curYear }} 牛牛后台
         </div>
       </div>
     </div>

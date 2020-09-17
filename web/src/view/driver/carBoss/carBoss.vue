@@ -6,7 +6,12 @@
           <el-input placeholder="搜索条件" v-model="searchInfo.name"></el-input>
         </el-form-item>
         <el-form-item label="状态">
-          <el-input placeholder="搜索条件" v-model="searchInfo.status"></el-input>
+          <el-form-item label="审核状态">
+            <el-select v-model="searchInfo.status" placeholder="全选" clearable style="width: 120px">
+              <el-option v-for="(item, index) in statusOptions" :key="index" :label="item.label"
+                         :value="item.value" :disabled="item.disabled"></el-option>
+            </el-select>
+          </el-form-item>
         </el-form-item>
         <el-form-item>
           <el-button @click="onSubmit" type="primary">查询</el-button>
@@ -50,12 +55,16 @@
 
     <el-table-column label="银行卡号" prop="bankNumber" width="120"></el-table-column>
 
-    <el-table-column label="状态" prop="status" width="120"></el-table-column>
+    <el-table-column label="状态" prop="status" width="120" :formatter="carBossAuditFormat"></el-table-column>
 
-    <el-table-column label="照片" prop="img" width="120"></el-table-column>
-
+      <el-table-column label="预览" width="100">
+        <template slot-scope="scope">
+          <CustomPic picType="file" :picSrc="scope.row.img"/>
+        </template>
+      </el-table-column>
       <el-table-column label="按钮组">
         <template slot-scope="scope">
+          <el-button @click="uploadImg(scope.row)" size="small" type="primary">上传照片</el-button>
           <el-button @click="updateCarBoss(scope.row)" size="small" type="primary">变更</el-button>
           <el-popover placement="top" width="160" v-model="scope.row.visible">
             <p>确定要删除吗？</p>
@@ -120,18 +129,34 @@
             </el-select>
           </el-form-item>
         </el-col>
+      </el-form>
+      <div class="dialog-footer" slot="footer">
+        <el-button @click="closeDialog">取 消</el-button>
+        <el-button @click="enterDialog" type="primary">确 定</el-button>
+      </div>
+    </el-dialog>
+    <el-dialog :before-close="closeDialog" :visible.sync="imgButtonVisible" title="弹窗操作">
+      <el-form ref="driverForm" :model="formData" :rules="rules" size="medium" label-width="100px">
+        <el-col :span="11" type="hidden">
+          <el-form-item label="" prop="ID" type="hidden">
+            <el-input v-model="formData.ID" type="hidden" clearable :style="{width: '100%'}">
+            </el-input>
+          </el-form-item>
+        </el-col>
         <el-col :span="24">
           <el-form-item label="证件照片" prop="img">
-            <el-upload ref="img" :file-list="imgfileList" :action="imgAction"
-                       :before-upload="imgBeforeUpload" list-type="picture-card" accept="image/*" name="img">
+            <el-upload ref="imgData" :file-list="imgfileList"
+                       :data="formData"
+                       :action="imgAction"
+                       :before-upload="imgBeforeUpload" list-type="picture-card" accept="image/*" name="file">
               <i class="el-icon-plus"></i>
             </el-upload>
           </el-form-item>
         </el-col>
       </el-form>
       <div class="dialog-footer" slot="footer">
-        <el-button @click="closeDialog">取 消</el-button>
-        <el-button @click="enterDialog" type="primary">确 定</el-button>
+        <el-button @click="closeImg">取 消</el-button>
+        <el-button @click="closeImg" type="primary">确 定</el-button>
       </div>
     </el-dialog>
   </div>
@@ -144,31 +169,40 @@ import {
     deleteCarBossByIds,
     updateCarBoss,
     findCarBoss,
-    getCarBossList
+    getCarBossList,
 } from "@/api/carBoss";  //  此处请自行替换地址
 import { formatTimeToStr } from "@/utils/data";
 import infoList from "@/components/mixins/infoList";
+import CustomPic from '@/components/customPic'
 
 export default {
   name: "CarBoss",
   mixins: [infoList],
+  components: {
+    CustomPic
+  },
   data() {
     return {
       listApi: getCarBossList,
       dialogFormVisible: false,
+      imgButtonVisible: false,
       visible: false,
       type: "",
       deleteVisible: false,
-      multipleSelection: [],formData: {
+      multipleSelection: {
         name:null,phone:null,identity:null,bank:null,bankNumber:null,status:null,img:null,
       },
       formData: {
+        method: undefined,
         name: undefined,
         phone: undefined,
         identity: undefined,
         bank: undefined,
         bankNumber: undefined,
         status: undefined,
+        img: null,
+      },
+      imgData: {
         img: null,
       },
       rules: {
@@ -199,17 +233,17 @@ export default {
           trigger: 'change'
         }],
       },
-      imgAction: 'https://jsonplaceholder.typicode.com/posts/',
+      imgAction: 'v1/fileUploadAndDownload/upload',
       imgfileList: [],
       statusOptions: [{
         "label": "审核中",
-        "value": 0
-      }, {
-        "label": "审核通过",
         "value": 1
       }, {
-        "label": "审核未通过",
+        "label": "审核通过",
         "value": 2
+      }, {
+        "label": "审核未通过",
+        "value": 3
       }],
     };
   },
@@ -231,6 +265,13 @@ export default {
     }
   },
   methods: {
+    carBossAuditFormat(row) {
+      switch (row.status) {
+        case 1: return "审核中"
+        case 2: return "审核通过"
+        case 3: return "审核不通过"
+      }
+    },
       //条件搜索前端看此方法
       onSubmit() {
         this.page = 1
@@ -289,6 +330,20 @@ export default {
         this.dialogFormVisible = true;
       }
     },
+    async uploadImg(row) {
+      const res = await findCarBoss({ ID: row.ID });
+      this.imgButtonVisible = true
+      this.formData = res.data.recarBoss;
+      this.formData.method = "carBoss"
+    },
+    closeImg() {
+        this.imgButtonVisible = false;
+        this.imgData = {
+          img: null,
+        }
+      this.closeDialog();
+      this.getTableData();
+    },
     closeDialog() {
       this.dialogFormVisible = false;
       this.formData = {
@@ -313,6 +368,7 @@ export default {
         this.getTableData();
       }
     },
+
     async enterDialog() {
       let res;
       switch (this.type) {

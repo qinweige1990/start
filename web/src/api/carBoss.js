@@ -98,3 +98,11 @@ export const createCarBoss = (data) => {
          params
      })
  }
+
+ export const uploadImg = (params) => {
+    return service({
+        url: "/fileUploadAndDownload/upload",
+        method: 'post',
+        params
+    })
+ }

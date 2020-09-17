@@ -8,7 +8,7 @@
         <div class="header">
           <a href="/">
             <!-- <img src="~@/assets/logo.png" class="logo" alt="logo" /> -->
-            <span class="title">大牛货运</span>
+            <span class="title">牛牛后台</span>
           </a>
         </div>
       </div>

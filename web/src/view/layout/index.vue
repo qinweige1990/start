@@ -5,7 +5,7 @@
       <el-aside class="main-cont main-left">
         <div class="tilte">
           <img alt class="logoimg" src="~@/assets/huoche2.png" />
-          <h2 class="tit-text" v-if="isSider">大牛货运</h2>
+          <h2 class="tit-text" v-if="isSider">牛牛后台</h2>
         </div>
         <Aside class="aside" />
       </el-aside>
